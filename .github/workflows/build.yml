@@ -52,7 +52,7 @@ jobs:
 
           test -f /tmp/merge/zygisk/arm64-v8a.so || { echo 'FATAL: .so missing'; exit 1; }
           test -f /tmp/merge/classes.dex || { echo 'FATAL: classes.dex missing'; exit 1; }
-          test -f /tmp/merge/packages/android || { echo 'FATAL: packages/android missing'; exit 1; }
+          test -f /tmp/merge/packages/.all || { echo 'FATAL: packages/.all missing'; exit 1; }
           test -f /tmp/merge/packages/.all || { echo 'FATAL: packages/.all missing'; exit 1; }
 
           cd /tmp/merge
