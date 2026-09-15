@@ -1,4 +1,5 @@
 import com.v7878.zygisk.gradle.ZygoteLoader
+import kotlin.io.path.Path
 
 plugins {
     alias(libs.plugins.agp.app)
@@ -18,6 +19,14 @@ android {
         versionName = "1.0"
     }
 
+    sourceSets {
+        getByName("main") {
+            java {
+                srcDirs(Path(rootDir.path, "external", "AndroidVMTools", "src", "main", "java"))
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,9 +40,7 @@ android {
 }
 
 zygisk {
-    // system_server：装 ZygoteHook，剔除 INET_GID
     packages(ZygoteLoader.PACKAGE_SYSTEM_SERVER)
-    // 全部 App 进程：装 InetExceptionPatchHook，改写 DNS 异常
     packages(ZygoteLoader.ALL_PACKAGES)
 
     id = "net_switch_zygisk"
@@ -48,6 +55,7 @@ zygisk {
 dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.io.github.vova7878.r8annotations)
+    implementation(libs.dev.rikka.hidden.compat)
 
     implementation(androidvmtools.panama.core)
     implementation(androidvmtools.panama.unsafe)
