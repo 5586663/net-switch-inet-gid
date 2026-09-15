@@ -15,9 +15,8 @@ jobs:
       - name: Clone AndroidVMTools dependency
         run: |
           git clone --depth 1 https://github.com/aerath-stuff/AndroidVMTools external/AndroidVMTools
-          test -f external/AndroidVMTools/gradle/libs.versions.toml \
+          test -f external/AndroidVMTools/src/main/java/com/v7878/vmtools/Hooks.java \
             || { echo 'FATAL: AndroidVMTools clone failed'; exit 1; }
-          ls external/AndroidVMTools/gradle/
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -43,17 +42,23 @@ jobs:
 
           rm -rf /tmp/zygisk && mkdir -p /tmp/zygisk
           unzip -q "$ZYGISK_ZIP" -d /tmp/zygisk
+          echo '--- zygisk zip contents ---'
+          find /tmp/zygisk -type f | sort
 
-          cp -r /tmp/zygisk/zygisk /tmp/merge/ 2>/dev/null || true
-          cp /tmp/zygisk/classes.dex /tmp/merge/ 2>/dev/null || true
+          cp -r /tmp/zygisk/zygisk /tmp/merge/
+          cp /tmp/zygisk/classes.dex /tmp/merge/
           cp -r /tmp/zygisk/dexopt /tmp/merge/ 2>/dev/null || true
+          cp -r /tmp/zygisk/packages /tmp/merge/
 
-          test -f /tmp/merge/zygisk/arm64-v8a.so || { echo 'FATAL: zygisk .so missing'; exit 1; }
-          test -f /tmp/merge/service.sh || { echo 'FATAL: service.sh missing'; exit 1; }
+          test -f /tmp/merge/zygisk/arm64-v8a.so || { echo 'FATAL: .so missing'; exit 1; }
+          test -f /tmp/merge/classes.dex || { echo 'FATAL: classes.dex missing'; exit 1; }
+          test -f /tmp/merge/packages/android || { echo 'FATAL: packages/android missing'; exit 1; }
+          test -f /tmp/merge/packages/.all || { echo 'FATAL: packages/.all missing'; exit 1; }
 
           cd /tmp/merge
-          zip -r -9 /tmp/net-switch-merged.zip . -x '.*'
-          ls -la /tmp/net-switch-merged.zip
+          zip -r -9 /tmp/net-switch-merged.zip .
+          echo '--- final merged contents ---'
+          unzip -l /tmp/net-switch-merged.zip
 
       - name: Upload merged module
         uses: actions/upload-artifact@v4
