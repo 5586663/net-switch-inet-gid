@@ -1,10 +1,13 @@
 package io.github.rem01gaming.netswitch.zygote.util
 
 /**
- * 精简自 HMA-OSS common/Constants.kt，只保留 GID 校验用到的部分。
+ * 精简自 HMA-OSS common/Constants.kt。
  *
- * GID_PAIRS 的用途：ZygoteHook 在剔除 GID 之前，先用它过滤掉
- * 不在名单里的 GID 值，避免误伤。
+ * GID_PAIRS：ZygoteHook 剔除 GID 前先过滤，避免误伤。
+ * packagesShouldNotBlock：名单里若混入这些包，直接跳过——GID 剔除发生在
+ * 进程创建期，系统核心包被剔会导致无法开机/UI 崩溃。
+ *
+ * 白名单取 HMA-OSS 原版全集（12 项），不缩减。
  */
 @Suppress("SpellCheckingInspection")
 object Constants {
@@ -33,7 +36,13 @@ object Constants {
         "APP_ZYGOTE_GID" to APP_ZYGOTE_GID,
     )
 
-    /** 名单内若混入这些包，直接跳过，避免系统 UI 崩溃 */
+    /**
+     * 名单内若混入这些包，GID 剔除直接跳过。
+     *
+     * 取自 HMA-OSS 原版 packagesShouldNotHide 全集 + 额外补充
+     * 常见系统服务（bluetooth / nfc / phone / telephony），
+     * 这些包一旦被剥夺 INTERNET，会导致开机失败或系统服务循环崩溃。
+     */
     val packagesShouldNotBlock: Set<String> = setOf(
         "android",
         "android.media",
@@ -41,5 +50,25 @@ object Constants {
         "android.uid.shell",
         "android.uid.systemui",
         "com.android.permissioncontroller",
+        "com.android.providers.downloads",
+        "com.android.providers.downloads.ui",
+        "com.android.providers.media",
+        "com.android.providers.media.module",
+        "com.android.providers.settings",
+        "com.google.android.providers.media.module",
+        "com.google.android.permissioncontroller",
+        // 额外补充：系统通信/设置核心，被剔 GID 会崩
+        "com.android.settings",
+        "com.android.phone",
+        "com.android.bluetooth",
+        "com.android.nfc",
+        "com.android.providers.telephony",
+        "com.android.providers.contacts",
+        "com.android.server.telecom",
+        "com.android.networkstack",
+        "com.android.networkstack.tethering",
+        "com.android.connectivity.resources",
+        "com.android.cellbroadcastreceiver",
+        "com.android.cellbroadcastservice",
     )
 }
