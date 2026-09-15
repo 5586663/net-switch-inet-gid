@@ -40,7 +40,6 @@ android {
 }
 
 zygisk {
-    packages(ZygoteLoader.PACKAGE_SYSTEM_SERVER)
     packages(ZygoteLoader.ALL_PACKAGES)
 
     id = "net_switch_zygisk"
