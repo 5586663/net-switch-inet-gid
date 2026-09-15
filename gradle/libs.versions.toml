@@ -4,6 +4,7 @@ kotlin = "2.3.21"
 zygoteloader = "bf5078e182"
 r8_annotations = "v1.0.1"
 androidx-annotation = "1.10.0"
+hidden-api = "4.4.0"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -13,3 +14,4 @@ com-github-aerathstuff-zygoteloader = { id = "com.github.aerath-stuff.ZygoteLoad
 [libraries]
 androidx-annotation-jvm = { module = "androidx.annotation:annotation-jvm", version.ref = "androidx-annotation" }
 io-github-vova7878-r8annotations = { module = "io.github.vova7878:R8Annotations", version.ref = "r8_annotations" }
+dev-rikka-hidden-compat = { module = "dev.rikka.hidden:compat", version.ref = "hidden-api" }
