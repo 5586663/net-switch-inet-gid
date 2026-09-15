@@ -65,7 +65,7 @@ class ZygoteHook {
             try {
                 Hooks.hook(
                     method,
-                    Hooks.EntryPointType.CURRENT,
+                    Hooks.EntryPointType.DIRECT,
                     { original, frame ->
                         try {
                             hookIntoZygoteProcess(frame)
