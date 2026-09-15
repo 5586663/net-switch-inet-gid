@@ -5,15 +5,19 @@ import java.io.File
 /**
  * 读取 net-switch 的 isolated.json 名单。
  *
- * 路径统一为 /data/adb/net-switch/isolated.json —— 与设备上现装
- * net-switch v1.2 的 service.sh、netswitch CLI、WebUI 全部一致。
+ * 路径优先级：
+ *  1. /data/system/net-switch/isolated.json  ← system_server 可读（system_data_file context）
+ *  2. /data/adb/net-switch/isolated.json     ← 数据源，仅 root 可读，system_server 读不到
  *
- * 兼容：若旧路径不存在但 v1.3 新路径存在，回退读新路径。
- * 缓存：按 lastModified 失效，名单改动后自动重读。
+ * 说明：/data/adb 是 u:object_r:adb_data_file:s0 + 700 root，system_server
+ * （uid 1000，u:r:system_server:s0）无 DAC 也无 MAC 权限。故 service.sh
+ * 以 root 身份把名单同步到 /data/system/net-switch/，本类读同步后的副本。
+ *
+ * 缓存：按 lastModified 失效，service.sh 每 10 秒同步，改动自动生效。
  */
 object IsolatedList {
-    private const val PATH_PRIMARY = "/data/adb/net-switch/isolated.json"
-    private const val PATH_FALLBACK = "/data/adb/.config/net-switch/isolated.json"
+    private const val PATH_PRIMARY = "/data/system/net-switch/isolated.json"
+    private const val PATH_FALLBACK = "/data/adb/net-switch/isolated.json"
 
     @Volatile private var cachedSet: Set<String>? = null
     @Volatile private var cachedMtime: Long = -1L
