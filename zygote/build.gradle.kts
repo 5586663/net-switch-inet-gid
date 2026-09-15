@@ -34,7 +34,7 @@ zygisk {
     // system_server：装 ZygoteHook，剔除 INET_GID
     packages(ZygoteLoader.PACKAGE_SYSTEM_SERVER)
     // 全部 App 进程：装 InetExceptionPatchHook，改写 DNS 异常
-    packages(ZygoteLoader.PACKAGE_APP)
+    packages(ZygoteLoader.ALL_PACKAGES)
 
     id = "net_switch_zygisk"
     name = "Net Switch Zygisk"
