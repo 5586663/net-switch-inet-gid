@@ -1,0 +1,7 @@
+id=net-switch
+name=Net Switch (INET_GID)
+version=1.4-fusion
+versionCode=56
+author=Rem01Gaming, Antonio-Riccio + INET_GID patch
+description=Isolate apps from Internet: iptables REJECT + INET_GID strip, driven by isolated.json
+updateJson=https://raw.githubusercontent.com/Rem01Gaming/net-switch/main/update.json
