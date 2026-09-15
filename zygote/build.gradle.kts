@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "io.github.rem01gaming.netswitch.zygote"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = namespace
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
