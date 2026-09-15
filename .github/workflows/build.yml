@@ -15,7 +15,7 @@ jobs:
       - name: Clone AndroidVMTools dependency
         run: |
           git clone --depth 1 https://github.com/aerath-stuff/AndroidVMTools external/AndroidVMTools
-          test -f external/AndroidVMTools/src/main/java/com/v7878/vmtools/Hooks.java \
+          test -f external/AndroidVMTools/gradle/libs.versions.toml \
             || { echo 'FATAL: AndroidVMTools clone failed'; exit 1; }
 
       - name: Set up JDK 21
@@ -43,22 +43,33 @@ jobs:
           rm -rf /tmp/zygisk && mkdir -p /tmp/zygisk
           unzip -q "$ZYGISK_ZIP" -d /tmp/zygisk
           echo '--- zygisk zip contents ---'
-          find /tmp/zygisk -type f | sort
+          find /tmp/zygisk -type f | head -30
 
-          cp -r /tmp/zygisk/zygisk /tmp/merge/
-          cp /tmp/zygisk/classes.dex /tmp/merge/
+          # 拷贝 zygisk 运行时
+          cp -r /tmp/zygisk/zygisk /tmp/merge/ 2>/dev/null || true
+          cp /tmp/zygisk/classes.dex /tmp/merge/ 2>/dev/null || true
           cp -r /tmp/zygisk/dexopt /tmp/merge/ 2>/dev/null || true
-          cp -r /tmp/zygisk/packages /tmp/merge/
 
-          test -f /tmp/merge/zygisk/arm64-v8a.so || { echo 'FATAL: .so missing'; exit 1; }
+          # 关键：拷贝 packages/ 标记（.all + android）
+          rm -rf /tmp/merge/packages
+          cp -r /tmp/zygisk/packages /tmp/merge/ 2>/dev/null || { echo 'FATAL: zygisk packages/ missing'; exit 1; }
+
+          # 校验
+          test -f /tmp/merge/zygisk/arm64-v8a.so || { echo 'FATAL: zygisk .so missing'; exit 1; }
           test -f /tmp/merge/classes.dex || { echo 'FATAL: classes.dex missing'; exit 1; }
+          test -f /tmp/merge/service.sh || { echo 'FATAL: service.sh missing'; exit 1; }
           test -f /tmp/merge/packages/.all || { echo 'FATAL: packages/.all missing'; exit 1; }
-          test -f /tmp/merge/packages/.all || { echo 'FATAL: packages/.all missing'; exit 1; }
+          test -f /tmp/merge/packages/android || { echo 'FATAL: packages/android missing'; exit 1; }
+          grep -q '^entrypoint=' /tmp/merge/module.prop || { echo 'FATAL: entrypoint missing in module.prop'; exit 1; }
+
+          echo '--- merged module.prop ---'
+          cat /tmp/merge/module.prop
+          echo '--- merged packages/ ---'
+          ls -la /tmp/merge/packages/
 
           cd /tmp/merge
-          zip -r -9 /tmp/net-switch-merged.zip .
-          echo '--- final merged contents ---'
-          unzip -l /tmp/net-switch-merged.zip
+          zip -r -9 /tmp/net-switch-merged.zip . -x '.*'
+          ls -la /tmp/net-switch-merged.zip
 
       - name: Upload merged module
         uses: actions/upload-artifact@v4
